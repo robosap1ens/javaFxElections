@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--<?import com.gluonhq.charm.glisten.control.ProgressIndicator?>-->
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<SplitPane dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="837.0" prefWidth="1080.0" stylesheets="@materialFx.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="elecciones_def.FXMLDocumentController">
+  <items>
+      <VBox fx:id="formVbox" alignment="CENTER" maxWidth="200.0" minWidth="200.0" prefHeight="835.0" prefWidth="200.0" spacing="35.0" style="-fx-background-color: #0d47a1;">
+         <children>
+            <Label fx:id="progressLabel" prefHeight="18.0" prefWidth="149.0" />
+            <ProgressBar fx:id="progress" prefHeight="21.0" prefWidth="151.0" progress="0.0" />
+           <!-- <ProgressIndicator fx:id="progress" disable="true" prefHeight="109.0" prefWidth="136.0" progress="0.0" VBox.vgrow="ALWAYS" />-->
+            <ChoiceBox fx:id="provCB" disable="true" prefWidth="150.0" />
+            <ChoiceBox fx:id="regCB" disable="true" prefWidth="150.0" />
+            <Pane fx:id="pane534" prefHeight="200.0" prefWidth="200.0" />
+         </children>
+      </VBox>
+      <Accordion fx:id="acc" styleClass="card">
+        <panes>
+          <TitledPane fx:id="pane1" animated="false" text="Reparto global de escaños">
+               <content>
+                  <HBox fx:id="hb1" prefHeight="100.0" prefWidth="200.0" />
+               </content>
+          </TitledPane>
+          <TitledPane fx:id="pane2" animated="false" text="Distribucin de votos">
+               <content>
+                  <HBox fx:id="hb2" prefHeight="100.0" prefWidth="200.0" />
+               </content>
+          </TitledPane>
+          <TitledPane fx:id="pane3" animated="false" text="Evolucion de la participacion">
+               <content>
+                  <HBox fx:id="hb3" prefHeight="100.0" prefWidth="200.0" />
+               </content>
+          </TitledPane>
+        </panes>
+      </Accordion>
+  </items>
+</SplitPane>
