@@ -17,9 +17,11 @@ import javafx.stage.Stage;
  */
 public class Elecciones_def extends Application {
     
+    static Stage stage;
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
+        this.stage = stage;
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("elecciones/materialFx.css");

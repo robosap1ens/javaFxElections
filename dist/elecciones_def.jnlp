@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="elecciones_def.jar" size="19375" download="eager" />
+    <jar href="elecciones_def.jar" size="21928" download="eager" />
     <jar href="lib/Elections-javadoc.jar" size="140044" download="eager" />
     <jar href="lib/elections-test.jar" size="81920" download="eager" />
   </resources>

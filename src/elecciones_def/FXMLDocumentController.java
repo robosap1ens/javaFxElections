@@ -67,17 +67,20 @@ public class FXMLDocumentController implements Initializable {
     private Pane pane534;
     @FXML
     private ProgressBar progress;
-    
+    @FXML
+    private Label progressLabel;
       
     
     /// attrs
     int[] yearIndex  = {1995, 1999, 2003, 2007, 2011, 2015};
     List<ElectionResults> erList;
-    @FXML
-    private Label progressLabel;
+    int numberOfToasts = 0;
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        
         
         // init autoField
         AutoCompleteTextField autoField = new AutoCompleteTextField();
@@ -89,9 +92,19 @@ public class FXMLDocumentController implements Initializable {
         autoField.setDisable(true);
         formVbox.getChildren().add(0, autoField);
         
+        autoField.setOnKeyPressed((event01)->{
+            if(numberOfToasts==0){
+                Toast toast = new Toast();            
+                String toastMsg = "Recuerda pulsar [Enter] una vez has seleccionado el año";
+                toast.makeText(Elecciones_def.stage, toastMsg, 2000, 500, 500);
+                numberOfToasts++;
+            }
+            
+        });
+        
         // init several nodes
         pane2.setText("Distribución de votos");
-        pane2.setText("Evolución de la participación");
+        pane3.setText("Evolución de la participación");
         
         // load data in bg;
         DataManager bgTask = new DataManager();        
@@ -134,15 +147,10 @@ public class FXMLDocumentController implements Initializable {
                     if(!badYear){
                         
                         // converting year to list index 
-                        int year = Integer.parseInt(autoField.getText());
-                        int j = 0;
-                        for (int i = 0; i < yearIndex.length; i++) {
-                            if (year == yearIndex[i]) {
-                                j = i;
-                                break;
-                            }
-                        }
+                        int year = Integer.parseInt(autoField.getText());                        
+                        int j = yearToIndex(year);
                         
+                       
                         // enable and populate - if needed - choiceboxes
                         provCB.setDisable(false);
                         regCB.setDisable(false);
@@ -154,20 +162,18 @@ public class FXMLDocumentController implements Initializable {
                         // load charts that need the year input
                         loadYearData(erList, j);
                         
-                        provCB.selectionModelProperty().addListener((event3)->{
-                            int year2 = Integer.parseInt(autoField.getText());
-                            int j1 = 0;
-                            for (int i = 0; i < yearIndex.length; i++) {
-                                if (year2 == yearIndex[i]) {
-                                    j1 = i;
-                                    break;
-                                }
-                            }
-                            loadProvinceData(erList, provCB.getSelectionModel().getSelectedItem(), j1);
+                        
+                        provCB.setOnAction((event3)->{
+                            
+                            loadProvinceData(erList, provCB.getSelectionModel().getSelectedItem(),yearToIndex(Integer.parseInt(autoField.getText())));
                             
                         });
                         
+                        regCB.setOnAction((event4)->{
+                            
+                            loadProvinceRegionData(erList, regCB.getSelectionModel().getSelectedItem(), yearToIndex(Integer.parseInt(autoField.getText())));
                         
+                        });
                     }
                     else {
                         alert.setContentText("No han habido elecciones en el \n año introducido.");
@@ -186,9 +192,20 @@ public class FXMLDocumentController implements Initializable {
         
     }
 
-
-
     
+    public int yearToIndex(int year){
+        int j = 0;
+        for (int i = 0; i < yearIndex.length; i++) {
+            if (year == yearIndex[i]) {
+                j = i;
+                break;
+            }
+        }
+        
+        return j;
+    }
+
+   
 
     public void loadGeneralData(List<ElectionResults> er){
         hb3.getChildren().add(lineChart(er));
@@ -207,10 +224,29 @@ public class FXMLDocumentController implements Initializable {
     }
     
     public void loadProvinceData(List<ElectionResults> er, String prov, int index){
-        hb1.getChildren().add(provinceResults(er.get(index).getProvinceResults(prov), prov));
-        hb2.getChildren().add(provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
+            if(hb1.getChildren().size()>1)
+                hb1.getChildren().remove(1);
+            hb1.getChildren().add( provinceResults(er.get(index).getProvinceResults(prov), prov));
+            if(hb1.getChildren().size()>1)
+                hb2.getChildren().remove(1);
+            
+            if(hb1.getChildren().size()>2)
+                    hb2.getChildren().add(1, provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
+            else 
+                    hb2.getChildren().add(provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
+            
     }
     
+    public void loadProvinceRegionData(List<ElectionResults> er, String reg, int index){
+        
+        
+        if(hb2.getChildren().size()>2)
+            hb2.getChildren().remove(2);
+        if(hb2.getChildren().size()==1)
+            hb2.getChildren().add(regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+        else
+            hb2.getChildren().add(2, regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+    }
     
     
     public PieChart caResults(RegionResults rg, int year){
