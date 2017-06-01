@@ -6,10 +6,10 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
 <SplitPane dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="837.0" prefWidth="1080.0" stylesheets="@materialFx.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="elecciones_def.FXMLDocumentController">
@@ -21,7 +21,7 @@
            <!-- <ProgressIndicator fx:id="progress" disable="true" prefHeight="109.0" prefWidth="136.0" progress="0.0" VBox.vgrow="ALWAYS" />-->
             <ChoiceBox fx:id="provCB" disable="true" prefWidth="150.0" />
             <ChoiceBox fx:id="regCB" disable="true" prefWidth="150.0" />
-            <Pane fx:id="pane534" prefHeight="200.0" prefWidth="200.0" />
+            <Slider fx:id="slider" />
          </children>
       </VBox>
       <Accordion fx:id="acc" styleClass="card">

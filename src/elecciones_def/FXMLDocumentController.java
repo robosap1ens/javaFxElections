@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -31,10 +32,12 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import jdk.nashorn.internal.runtime.regexp.RegExpFactory;
 
 /**
  *
@@ -64,8 +67,6 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Pane hb3;
     @FXML
-    private Pane pane534;
-    @FXML
     private ProgressBar progress;
     @FXML
     private Label progressLabel;
@@ -75,11 +76,16 @@ public class FXMLDocumentController implements Initializable {
     int[] yearIndex  = {1995, 1999, 2003, 2007, 2011, 2015};
     List<ElectionResults> erList;
     int numberOfToasts = 0;
+    @FXML
+    private Slider slider;
     
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
+        slider.setMax(5.0);
+        slider.setBlockIncrement(1.0);
+        slider.setDisable(true);
         
         
         // init autoField
@@ -146,6 +152,83 @@ public class FXMLDocumentController implements Initializable {
                             badYear = false;
                     if(!badYear){
                         
+                        //slider event
+                        slider.setDisable(false);
+                        slider.valueProperty().addListener((event34) -> {
+                            double val = slider.getValue();
+                            Node[] nodes = new Node[hb2.getChildren().size()];
+                            ElectionResults er = erList.get(yearToIndex(Integer.parseInt(autoField.getText())));
+                            
+                            for(int i = 0;i < hb2.getChildren().size(); i++){
+                                nodes[i] = hb2.getChildren().get(i);
+                                BarChart<String, Number> cb = (BarChart) nodes[i];
+                                String id = cb.getId().substring(0, 1);
+                                if(id.equals("c")){
+                                    
+                                    //hb2.getChildren().remove(0); 
+                                    List<PartyResults> listPr = er.getGlobalResults().getPartyResultsSorted();
+                                    for(int  j= 0;j < listPr.size(); j++){
+                                        if(listPr.get(j).getPercentage() <= val){
+                                            
+                                            listPr.remove(j);
+                                            
+                                        }
+                                    }
+                                                                                                          
+                                    if(hb2.getChildren().size()>1){
+                                        hb2.getChildren().remove(0);
+                                        hb2.getChildren().add(0, caBarResults(listPr, er.getYear()));
+                                    }
+                                    else{
+                                        hb2.getChildren().remove(0, hb2.getChildren().size());
+                                        hb2.getChildren().add(caBarResults(listPr, er.getYear()));
+                                    } 
+                                        
+                                    
+                                    
+                                    
+                                } else if (id.equals("p")){
+                                    String prov = cb.getTitle().substring(25, cb.getTitle().length());
+                                    List<PartyResults> listPr = er.getProvinceResults(prov).getPartyResultsSorted();
+                                    for (int j = 0; j < listPr.size(); j++) {
+                                        if (listPr.get(j).getPercentage() <= val) {
+
+                                            listPr.remove(j);
+
+                                        }
+                                    }
+                                    
+                                      
+                                        hb2.getChildren().remove(1);
+                                        hb2.getChildren().add(1, provinceBarResults(listPr, prov, er.getYear()));
+                                    
+                                    
+                                } else {
+                                    String reg = cb.getTitle().substring(25, cb.getTitle().length());
+                                    List<PartyResults> listPr = er.getRegionResults(reg).getPartyResultsSorted();
+                                    for (int j = 0; j < listPr.size(); j++) {
+                                        if (listPr.get(j).getPercentage() <= val) {
+
+                                            listPr.remove(j);
+
+                                        }
+                                    }
+                                    if(hb2.getChildren().size()==1){
+                                        hb2.getChildren().remove(1);
+                                        hb2.getChildren().add(1, regionBarResulst(listPr, reg, er.getYear()));
+                                    }
+                                    else {
+                                        hb2.getChildren().remove(2);
+                                        hb2.getChildren().add(2, regionBarResulst(listPr, reg, er.getYear()));
+                                    }
+                                }
+                            }
+                            
+                            
+                            
+                        });
+
+                        
                         // converting year to list index 
                         int year = Integer.parseInt(autoField.getText());                        
                         int j = yearToIndex(year);
@@ -209,9 +292,10 @@ public class FXMLDocumentController implements Initializable {
 
     public void loadGeneralData(List<ElectionResults> er){
         hb3.getChildren().add(lineChart(er));
-        hb2.getChildren().add(stackedBarChart(er));
-        
+        hb3.getChildren().add(stackedBarChart(er));
+        hb3.getChildren().add(barChart(er));
     }    
+    
     public void loadYearData(List<ElectionResults> er, int index){
         if(!hb1.getChildren().isEmpty())
             hb1.getChildren().remove(0, hb1.getChildren().size());
@@ -220,32 +304,51 @@ public class FXMLDocumentController implements Initializable {
             hb2.getChildren().remove(1, hb2.getChildren().size());
         
         hb1.getChildren().add(0, caResults(er.get(index).getGlobalResults(), er.get(index).getYear()));
-        hb2.getChildren().add(1, caBarResults(er.get(index).getGlobalResults(), er.get(index).getYear()));
+        hb2.getChildren().add(caBarResults(er.get(index).getGlobalResults(), er.get(index).getYear()));
+        
     }
     
     public void loadProvinceData(List<ElectionResults> er, String prov, int index){
             if(hb1.getChildren().size()>1)
                 hb1.getChildren().remove(1);
             hb1.getChildren().add( provinceResults(er.get(index).getProvinceResults(prov), prov));
-            if(hb1.getChildren().size()>1)
+           
+            if(hb2.getChildren().size()==1){
+                hb2.getChildren().add( provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
+            }
+            
+            
+            if(hb2.getChildren().size()== 2 && hb2.getChildren().get(1).getId().equals("provBar")){
                 hb2.getChildren().remove(1);
-            
-            if(hb1.getChildren().size()>2)
-                    hb2.getChildren().add(1, provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
-            else 
-                    hb2.getChildren().add(provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
-            
+                hb2.getChildren().add(1, provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
+            }else if(hb2.getChildren().size()== 2 && !hb2.getChildren().get(1).getId().equals("provBar")){
+                hb2.getChildren().remove(1);
+                hb2.getChildren().add(1, provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
+            }else if(hb2.getChildren().size()==3) {
+                hb2.getChildren().remove(1);
+                hb2.getChildren().add(1,provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
+            }
+
     }
+    
     
     public void loadProvinceRegionData(List<ElectionResults> er, String reg, int index){
         
         
-        if(hb2.getChildren().size()>2)
-            hb2.getChildren().remove(2);
-        if(hb2.getChildren().size()==1)
+        if(hb2.getChildren().size()==2 && hb2.getChildren().get(1).getId().equals("regBar")){
+            hb2.getChildren().remove(1);
             hb2.getChildren().add(regionBarResults(er.get(index).getRegionResults(reg), reg, index));
-        else
-            hb2.getChildren().add(2, regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+        }
+        else if(hb2.getChildren().size() == 2 && !hb2.getChildren().get(1).getId().equals("regBar")){
+            hb2.getChildren().add(regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+            System.out.println("eres totonto");
+        }
+        
+        if(hb2.getChildren().size()==3){
+            hb2.getChildren().remove(2);
+            hb2.getChildren().add(2,regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+        }
+        
     }
     
     
@@ -274,6 +377,30 @@ public class FXMLDocumentController implements Initializable {
         return pie;
         
     }        
+    
+    public BarChart provinceBarResults(List<PartyResults> listPr, String prov, int year){
+            CategoryAxis xAxis = new CategoryAxis();
+            NumberAxis yAxis = new NumberAxis();
+            BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
+            bChart.setTitle("Distribución de votos de " + prov);
+
+            bChart.setId("provBar");
+
+            int i = 0;
+            Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
+            while (i < listPr.size()) {
+                XYChart.Series series = new XYChart.Series();
+                PartyResults pr = listPr.get(i);
+                series.setName(pr.getParty());
+
+                series.getData().add(new XYChart.Data(year + "", pr.getVotes()));
+                bChart.getData().add(series);
+
+                i++;
+            }
+
+            return bChart;
+    }
     public BarChart provinceBarResults(RegionResults rg, String prov, int year){
         
         
@@ -282,7 +409,7 @@ public class FXMLDocumentController implements Initializable {
         BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
         bChart.setTitle("Distribución de votos de " + prov);
                 
-        
+        bChart.setId("provBar");
         
         int i = 0;
         Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
@@ -302,6 +429,30 @@ public class FXMLDocumentController implements Initializable {
         
         return bChart;
     }            
+    
+    public BarChart regionBarResulst(List<PartyResults> listPr, String reg, int year){
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
+        bChart.setTitle("Distribución de votos de " + reg);
+
+        bChart.setId("regBar");
+
+        int i = 0;
+        Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
+        while (i < listPr.size()) {
+            XYChart.Series series = new XYChart.Series();
+            PartyResults pr = listPr.get(i);
+            series.setName(pr.getParty());
+
+            series.getData().add(new XYChart.Data(year + "", pr.getVotes()));
+            bChart.getData().add(series);
+
+            i++;
+        }
+
+        return bChart;
+    }
     public BarChart regionBarResults(RegionResults rg, String reg, int year){
         
         
@@ -310,7 +461,7 @@ public class FXMLDocumentController implements Initializable {
         BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
         bChart.setTitle("Distribución de votos de " + reg);
         
-        
+        bChart.setId("regBar");
         
         int i = 0;
         Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
@@ -330,6 +481,35 @@ public class FXMLDocumentController implements Initializable {
         
         return bChart;
     }        
+    
+    public BarChart caBarResults(List<PartyResults> listPr, int year){
+        
+        
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
+        bChart.setTitle("Distribución de votos del País Valencià en " + year);
+        
+        bChart.setId("caBar");
+        
+        
+        int i = 0;
+        Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
+        while (i<listPr.size()){
+            XYChart.Series series = new XYChart.Series();
+            PartyResults pr= listPr.get(i);
+            series.setName(pr.getParty());
+            
+            series.getData().add(new XYChart.Data(year+ "", pr.getVotes()));            
+            bChart.getData().add(series);                        
+                        
+            
+            i++;
+        }                                
+        
+        return bChart;
+    }
+    
     public BarChart caBarResults(RegionResults rg, int year){
         
         
@@ -338,7 +518,7 @@ public class FXMLDocumentController implements Initializable {
         BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
         bChart.setTitle("Distribución de votos del País Valencià en " + year);
         
-        
+        bChart.setId("caBar");
         
         
         int i = 0;
@@ -348,8 +528,7 @@ public class FXMLDocumentController implements Initializable {
             PartyResults pr= rg.getPartyResultsSorted().get(i);
             series.setName(pr.getParty());
             
-            series.getData().add(new XYChart.Data(year+ "", pr.getVotes()));
-            //displayLabelForData(new XYChart.Data(year+ "", pr.getVotes()));
+            series.getData().add(new XYChart.Data(year+ "", pr.getVotes()));            
             bChart.getData().add(series);                        
                         
             
@@ -362,7 +541,7 @@ public class FXMLDocumentController implements Initializable {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         StackedBarChart<String, Number> sbChart = new StackedBarChart<>(xAxis, yAxis);
-        sbChart.setTitle("Evolución de la distribución de escaños del País Valencià ");
+        sbChart.setTitle("Escaños del País Valencià ");
         
         int foo = 0;
         while(foo<er.size()){
@@ -372,6 +551,7 @@ public class FXMLDocumentController implements Initializable {
             Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
             while (i < rg.getPartyResultsSorted().size()) {
                 XYChart.Series series = new XYChart.Series();
+
                 PartyResults pr = rg.getPartyResultsSorted().get(i);
                
                 series.setName(pr.getParty());
@@ -390,35 +570,83 @@ public class FXMLDocumentController implements Initializable {
         return sbChart;
     }
     private LineChart lineChart(List<ElectionResults> er){
+        int i = 0;
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        LineChart<String, Number> lChart = new LineChart<>(xAxis, yAxis);
-        lChart.setTitle("Evolución del voto en el País Valencià ");
+        LineChart<String, Number> lChart = new LineChart<String, Number>(xAxis,yAxis);
+    
         
-        int foo = 0;
-        while (foo < er.size()) {
-            RegionResults rg = er.get(foo).getGlobalResults();
-
-            int i = 0;
-            //Collection<XYChart.Series> bcData = FXCollections.observableArrayList();
-            while (i < rg.getPartyResultsSorted().size()) {
+        
+        while(i<er.size()){
+            List<PartyResults> lpr = er.get(i).getGlobalResults().getPartyResultsSorted();
+            int j = 0;
+            
+            while(j < lpr.size()){
                 XYChart.Series series = new XYChart.Series();
-                PartyResults pr = rg.getPartyResultsSorted().get(i);
-                series.setName(pr.getParty());
-                series.getData().add(new XYChart.Data(er.get(foo).getYear() + "", pr.getVotes()));
+                series.setName(lpr.get(j).getParty());
+                series.getData().add(new XYChart.Data(er.get(i).getYear()+"", lpr.get(j).getVotes()));
                 lChart.getData().add(series);
-
-                i++;
+                j++;
             }
-
-            foo++;
+                                                
+            
+            i++;
         }
-        
-        lChart.setLegendVisible(true);
+    
+    
         return lChart;
-        
     }
 
     
+    public BarChart barChart(List<ElectionResults>er){
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        BarChart<String, Number> bChart = new BarChart<>(xAxis, yAxis);
+        bChart.setTitle("Evolución de la distribución de votos del País Valencià ");
+        XYChart.Series seriesCA = new XYChart.Series();
+        XYChart.Series seriesVLC = new XYChart.Series();
+        XYChart.Series seriesCTLN = new XYChart.Series();
+        XYChart.Series seriesALCT = new XYChart.Series();
+        seriesCA.setName("Comunidad Valenciana");
+        seriesALCT.setName("Alicante");
+        seriesCTLN.setName("Castellón");
+        seriesVLC.setName("Valencia");
+        int foo = 0;
+        
+        while (foo < er.size()) {
+            RegionResults rg = er.get(foo).getGlobalResults();
+            int year = er.get(foo).getYear();
+            double votesCA = er.get(foo).getGlobalResults().getPollData().getVotes();
+            double censusCA = er.get(foo).getGlobalResults().getPollData().getCensus();
+            double percentageCA = votesCA / censusCA * 100;
+            
+            //Valencia
+            double percentageVLC = (double) er.get(foo).getProvinceResults("Valencia").getPollData().getVotes() /
+                    (double) er.get(foo).getProvinceResults("Valencia").getPollData().getCensus() * 100;
+            double percentageALCT = (double) er.get(foo).getProvinceResults("Alicante").getPollData().getVotes() /
+                    (double) er.get(foo).getProvinceResults("Alicante").getPollData().getCensus() * 100;
+            double percentageCTLN = (double) er.get(foo).getProvinceResults("Castellón").getPollData().getVotes()
+                    / (double) er.get(foo).getProvinceResults("Castellón").getPollData().getCensus() * 100;
+            
+            
+            seriesCA.getData().remove(0, seriesCA.getData().size());
+            seriesCA.getData().add(new XYChart.Data(year+"", percentageCA));                        
+            seriesALCT.getData().add(new XYChart.Data(year+"",percentageALCT));            
+            seriesCTLN.getData().add(new XYChart.Data(year + "", percentageCTLN));
+
+            
+            seriesVLC.getData().add(new XYChart.Data(year + "", percentageVLC));
+
+                       
+            
+            foo++;
+            
+        }
+        
+        bChart.getData().addAll(seriesCA, seriesVLC, seriesALCT, seriesCTLN);
+        bChart.setLegendVisible(true);
+        return bChart;
+    }
     
+
 }
