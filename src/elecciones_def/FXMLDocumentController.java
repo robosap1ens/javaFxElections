@@ -83,6 +83,8 @@ public class FXMLDocumentController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
+        
+        
         slider.setMax(5.0);
         slider.setBlockIncrement(1.0);
         slider.setDisable(true);
@@ -102,7 +104,7 @@ public class FXMLDocumentController implements Initializable {
             if(numberOfToasts==0){
                 Toast toast = new Toast();            
                 String toastMsg = "Recuerda pulsar [Enter] una vez has seleccionado el año";
-                toast.makeText(Elecciones_def.stage, toastMsg, 2000, 500, 500);
+                toast.makeText(Elecciones_def.stage, toastMsg, 500, 500, 500);
                 numberOfToasts++;
             }
             
@@ -215,11 +217,11 @@ public class FXMLDocumentController implements Initializable {
                                     }
                                     if(hb2.getChildren().size()==1){
                                         hb2.getChildren().remove(1);
-                                        hb2.getChildren().add(1, regionBarResulst(listPr, reg, er.getYear()));
+                                        hb2.getChildren().add(1, regionBarResults(listPr, reg, er.getYear()));
                                     }
                                     else {
                                         hb2.getChildren().remove(2);
-                                        hb2.getChildren().add(2, regionBarResulst(listPr, reg, er.getYear()));
+                                        hb2.getChildren().add(2, regionBarResults(listPr, reg, er.getYear()));
                                     }
                                 }
                             }
@@ -236,7 +238,9 @@ public class FXMLDocumentController implements Initializable {
                        
                         // enable and populate - if needed - choiceboxes
                         provCB.setDisable(false);
-                        regCB.setDisable(false);
+                       
+                        
+                        
                         if(provCB.getItems().isEmpty()){
                             provCB.setItems(FXCollections.observableArrayList(erList.get(j).getProvinces().keySet()));
                             regCB.setItems(FXCollections.observableArrayList(erList.get(j).getRegionProvinces().keySet()));
@@ -247,7 +251,7 @@ public class FXMLDocumentController implements Initializable {
                         
                         
                         provCB.setOnAction((event3)->{
-                            
+                            regCB.setDisable(false);
                             loadProvinceData(erList, provCB.getSelectionModel().getSelectedItem(),yearToIndex(Integer.parseInt(autoField.getText())));
                             
                         });
@@ -314,40 +318,62 @@ public class FXMLDocumentController implements Initializable {
             hb1.getChildren().add( provinceResults(er.get(index).getProvinceResults(prov), prov));
            
             if(hb2.getChildren().size()==1){
-                hb2.getChildren().add( provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
+                                
+                hb2.getChildren().add(provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
             }
-            
-            
-            if(hb2.getChildren().size()== 2 && hb2.getChildren().get(1).getId().equals("provBar")){
-                hb2.getChildren().remove(1);
-                hb2.getChildren().add(1, provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));        
-            }else if(hb2.getChildren().size()== 2 && !hb2.getChildren().get(1).getId().equals("provBar")){
-                hb2.getChildren().remove(1);
-                hb2.getChildren().add(1, provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
-            }else if(hb2.getChildren().size()==3) {
-                hb2.getChildren().remove(1);
-                hb2.getChildren().add(1,provinceBarResults(er.get(index).getProvinceResults(prov), prov, index));
+            if(hb2.getChildren().size()==2){
+                if(hb2.getChildren().get(1).getId().equals("provBar")){
+                    hb2.getChildren().remove(1);
+                    
+                }
+                hb2.getChildren().add(provinceBarResults(er.get(index).getProvinceResults(prov), prov, index)); 
+            }
+            if(hb2.getChildren().size()==3){
+                if(hb2.getChildren().get(1).getId().equals("provBar")){
+                    hb2.getChildren().remove(1);
+                    hb2.getChildren().add(1,provinceBarResults(er.get(index).getProvinceResults(prov), prov, index)); 
+                }
+                if(hb2.getChildren().get(2).getId().equals("provBar")){{
+                    hb2.getChildren().remove(1);
+                    hb2.getChildren().add(2,provinceBarResults(er.get(index).getProvinceResults(prov), prov, index)); 
+                }
+                
             }
 
+    }
     }
     
     
     public void loadProvinceRegionData(List<ElectionResults> er, String reg, int index){
         
         
-        if(hb2.getChildren().size()==2 && hb2.getChildren().get(1).getId().equals("regBar")){
-            hb2.getChildren().remove(1);
+        
+        if(hb2.getChildren().size()==1)
             hb2.getChildren().add(regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+        
+        if(hb2.getChildren().size()==2){
+            if(hb2.getChildren().get(1).getId().equals("regBar")){
+                hb2.getChildren().remove(1);
+                hb2.getChildren().add(regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+            }
+            else {
+                hb2.getChildren().add( regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+            }
         }
-        else if(hb2.getChildren().size() == 2 && !hb2.getChildren().get(1).getId().equals("regBar")){
-            hb2.getChildren().add(regionBarResults(er.get(index).getRegionResults(reg), reg, index));
-            System.out.println("eres totonto");
+        if(hb2.getChildren().size()==3){
+            System.out.println("tres");
+            if(hb2.getChildren().get(1).getId().equals("regBar")){
+                hb2.getChildren().remove(1);
+                hb2.getChildren().add(1,regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+                System.out.println("Tam3get1.idRegBar");
+            }
+            if(hb2.getChildren().get(2).getId().equals("regBar")){
+                hb2.getChildren().remove(2);
+                hb2.getChildren().add( regionBarResults(er.get(index).getRegionResults(reg), reg, index));
+                System.out.println("Tam3get2.idRegBar");
+            }
         }
         
-        if(hb2.getChildren().size()==3){
-            hb2.getChildren().remove(2);
-            hb2.getChildren().add(2,regionBarResults(er.get(index).getRegionResults(reg), reg, index));
-        }
         
     }
     
@@ -430,7 +456,7 @@ public class FXMLDocumentController implements Initializable {
         return bChart;
     }            
     
-    public BarChart regionBarResulst(List<PartyResults> listPr, String reg, int year){
+    public BarChart regionBarResults(List<PartyResults> listPr, String reg, int year){
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         BarChart<String, Number> bChart = new BarChart<String, Number>(xAxis, yAxis);
